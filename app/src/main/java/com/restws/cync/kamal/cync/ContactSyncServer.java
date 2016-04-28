@@ -13,6 +13,7 @@ public class ContactSyncServer extends Application {
     public synchronized Restlet createInboundRoot() {
         Router routerInstance = new Router(getContext());
         routerInstance.attach("/cync",ContactSyncWebService.class);
+        routerInstance.attach("/cync/{term}", ContactSyncWebService.class);
         return routerInstance;
     }
 }
