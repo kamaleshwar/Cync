@@ -1,5 +1,7 @@
 package com.restws.cync.kamal.cync;
 
+import android.util.Log;
+
 import org.restlet.data.Form;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
@@ -13,12 +15,7 @@ public class ContactSyncWebService extends ServerResource implements ContactSync
 
     private String oldNumber = "oldContactNumber";
     private String newNumber = "newContactNumber";
-
-    @Override
-    @Get
-    public String testGet() {
-        return "Working";
-    }
+    private final String searchAttribute = "term";
 
     @Override
     @Post
@@ -33,5 +30,19 @@ public class ContactSyncWebService extends ServerResource implements ContactSync
         } catch (Exception e) {
         }
         return "OK";
+    }
+
+    @Override
+    @Get
+    public String searchContacts() {
+        String response = "";
+        try {
+
+            String searchTerm = getAttribute(searchAttribute);
+            response = HomeScreenActivityFragment.searchContacts(searchTerm);
+        } catch (Exception e) {
+            Log.e("errorhere", e.getMessage(), e);
+        }
+        return response;
     }
 }
