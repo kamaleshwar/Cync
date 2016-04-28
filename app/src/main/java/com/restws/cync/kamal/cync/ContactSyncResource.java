@@ -9,9 +9,9 @@ import org.restlet.resource.Post;
  */
 public interface ContactSyncResource {
 
-    @Get
-    public String testGet();
-
     @Post
     public String postNumberUpdate(Representation updatedContactNumber);
+
+    @Get
+    public String searchContacts();
 }
