@@ -42,17 +42,18 @@ public class ContactCursorLoader extends AsyncTaskLoader<Cursor> {
         CyncDBHelper dbHelper = new CyncDBHelper(getContext());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor registeredCursor = sRegisteredContacts.query(db,
-                new String[] {
-                        CyncDBContract.ServerContactsEntry.TABLE_NAME + "." +
-                        CyncDBContract.ServerContactsEntry._ID,
-                        CyncDBContract.ContactsEntry.COLUMN_NAME,
-                        CyncDBContract.ContactsEntry.COLUMN_NUMBER},
-                        null,
-                        null,
-                        null,
-                        null,
-                        sortOrder);
+        final Cursor registeredCursor = sRegisteredContacts.query(db,
+                new String[]
+                        {CyncDBContract.ServerContactsEntry.TABLE_NAME + "." +
+                                CyncDBContract.ServerContactsEntry._ID,
+                                CyncDBContract.ContactsEntry.COLUMN_NAME,
+                                CyncDBContract.ContactsEntry.COLUMN_NUMBER,
+                                CyncDBContract.ServerContactsEntry.COLUMN_IP},
+                null,
+                null,
+                null,
+                null,
+                sortOrder);
 
         return registeredCursor;
 
