@@ -13,15 +13,21 @@ import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.restws.cync.kamal.cync.data.CyncDBContract;
 import com.restws.cync.kamal.cync.data.CyncDBHelper;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -46,8 +52,10 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
 
     private static final SQLiteQueryBuilder sRegisteredContacts = new SQLiteQueryBuilder();
 
+
     static final int COL_CONTACT_NAME = 1;
     static final int COL_CONTACT_NUMBER = 2;
+
 
     static {
         sRegisteredContacts.setTables(CyncDBContract.ServerContactsEntry.TABLE_NAME + " LEFT JOIN " +
@@ -68,12 +76,12 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
         setHasOptionsMenu(true);
         HomeScreenActivityFragment.staticContext = getContext();
         loaderContext = this;
-        getActivity().getSupportLoaderManager().initLoader(CONTACT_LOADER, null,this);
+        getActivity().getSupportLoaderManager().initLoader(CONTACT_LOADER, null, this);
         getActivity().registerReceiver(FragmentReceiver, new IntentFilter("com.restws.cync.kamal.cync.fragmentupdater"));
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         getActivity().unregisterReceiver(FragmentReceiver);
     }
@@ -83,7 +91,8 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
         @Override
         public void onReceive(Context context, Intent intent) {
             getActivity().getSupportLoaderManager().restartLoader(CONTACT_LOADER, null, loaderContext);
-        }};
+        }
+    };
 
     public static void updatePhoneBook(String name, String number) {
         Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
@@ -119,6 +128,41 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
     }
 
 
+    public static String searchContacts(String term) {
+        CyncDBHelper dbHelper = new CyncDBHelper(staticContext);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        JSONArray contactsArray = new JSONArray();
+        JSONObject contactsObject = new JSONObject();
+        String contactsStringObject = "";
+
+        Cursor contactNameCursor = db.rawQuery("select " + CyncDBContract.ContactsEntry.COLUMN_NAME + " , " +
+                CyncDBContract.ContactsEntry.COLUMN_NUMBER + " FROM " +
+                CyncDBContract.ContactsEntry.TABLE_NAME + " WHERE " +
+                CyncDBContract.ContactsEntry.COLUMN_NAME + " LIKE " +
+                "'%" + term + "%'", null);
+
+        int columnNameIndex = contactNameCursor.getColumnIndex(CyncDBContract.ContactsEntry.COLUMN_NAME);
+        int columnNumberIndex = contactNameCursor.getColumnIndex(CyncDBContract.ContactsEntry.COLUMN_NUMBER);
+
+        try {
+
+            while (contactNameCursor.moveToNext()) {
+                JSONObject contact = new JSONObject();
+                String contactName = contactNameCursor.getString(columnNameIndex);
+                String contactNumber = contactNameCursor.getString(columnNumberIndex);
+                contact.put(contactName, contactNumber);
+                contactsArray.put(contact);
+            }
+            contactsStringObject = contactsArray.toString();
+
+        } catch (JSONException e) {
+            Log.e("JSONException", e.getMessage(), e);
+        }
+
+        return contactsStringObject;
+    }
+
+
     public interface Callback {
         /**
          * DetailFragmentCallback for when an item has been selected.
@@ -142,12 +186,13 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
         CyncDBHelper dbHelper = new CyncDBHelper(getContext());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cur = sRegisteredContacts.query(db,
+        final Cursor cur = sRegisteredContacts.query(db,
                 new String[]
                         {CyncDBContract.ServerContactsEntry.TABLE_NAME + "." +
                                 CyncDBContract.ServerContactsEntry._ID,
                                 CyncDBContract.ContactsEntry.COLUMN_NAME,
-                                CyncDBContract.ContactsEntry.COLUMN_NUMBER},
+                                CyncDBContract.ContactsEntry.COLUMN_NUMBER,
+                                CyncDBContract.ServerContactsEntry.COLUMN_IP},
                 null,
                 null,
                 null,
@@ -159,6 +204,36 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
 
         mContactAdapter = new ContactAdapter(getActivity(), cur, 0);
         mContactsListView.setAdapter(mContactAdapter);
+        mContactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            final String contactNameKey = "contactName_Key";
+            final String contactNumberKey = "contactNumber_Key";
+            final String contactIpKey = "ContactIP_Key";
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                for (int i = 0; i < cursor.getColumnNames().length; i++) {
+                    Log.v("columnnmaes", cursor.getColumnNames()[i].toString());
+                }
+
+                String contactName = cursor.getString(cursor.
+                        getColumnIndex(CyncDBContract.ContactsEntry.COLUMN_NAME));
+                String contactNumber = cursor.getString(cursor.
+                        getColumnIndex(CyncDBContract.ContactsEntry.COLUMN_NUMBER));
+                String contactIP = cursor.getString(cursor.
+                        getColumnIndex(CyncDBContract.ServerContactsEntry.COLUMN_IP));
+
+                Intent detailIntent = new Intent(getContext(), DetailsActivity.class);
+                detailIntent.putExtra(contactNameKey, contactName);
+                detailIntent.putExtra(contactNumberKey, contactNumber);
+                detailIntent.putExtra(contactIpKey, contactIP);
+                startActivity(detailIntent);
+                mPosition = position;
+            }
+        });
+
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
@@ -167,7 +242,6 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
         dbHelper.close();
         return rootView;
     }
-
 
 
     @Override
