@@ -62,4 +62,5 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_blank">BlankActivity</string>
+    <string name="title_activity_details">Contact Details</string>
 </resources>
