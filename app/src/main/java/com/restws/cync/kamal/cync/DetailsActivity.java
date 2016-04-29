@@ -52,6 +52,7 @@ public class DetailsActivity extends AppCompatActivity {
     public void lookUp() {
         String searchTerm = mSearchTerm.getText().toString();
         getSearchTerm(searchTerm, contactIP);
+        mSearchTerm.setText("");
     }
 
     public void getSearchTerm(String term, String endpoint) {
