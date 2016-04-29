@@ -41,18 +41,13 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
     ListView mContactsListView;
 
     private ContactAdapter mContactAdapter;
-
     private int mPosition = ListView.INVALID_POSITION;
-
     private static final String SELECTED_KEY = "selected_position";
-
-    private static final int CONTACT_LOADER = 81215;
+    private static final int CONTACT_LOADER = 81000;
+    private static final SQLiteQueryBuilder sRegisteredContacts = new SQLiteQueryBuilder();
+    private final String BroadCastIntentId = "com.restws.cync.kamal.cync.fragmentupdater";
 
     static Context staticContext;
-
-    private static final SQLiteQueryBuilder sRegisteredContacts = new SQLiteQueryBuilder();
-
-
     static final int COL_CONTACT_NAME = 1;
     static final int COL_CONTACT_NUMBER = 2;
 
@@ -77,7 +72,7 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
         HomeScreenActivityFragment.staticContext = getContext();
         loaderContext = this;
         getActivity().getSupportLoaderManager().initLoader(CONTACT_LOADER, null, this);
-        getActivity().registerReceiver(FragmentReceiver, new IntentFilter("com.restws.cync.kamal.cync.fragmentupdater"));
+        getActivity().registerReceiver(FragmentReceiver, new IntentFilter(BroadCastIntentId));
     }
 
     @Override
@@ -132,7 +127,6 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
         CyncDBHelper dbHelper = new CyncDBHelper(staticContext);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         JSONArray contactsArray = new JSONArray();
-        JSONObject contactsObject = new JSONObject();
         String contactsStringObject = "";
 
         Cursor contactNameCursor = db.rawQuery("select " + CyncDBContract.ContactsEntry.COLUMN_NAME + " , " +
@@ -156,7 +150,7 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
             contactsStringObject = contactsArray.toString();
 
         } catch (JSONException e) {
-            Log.e("JSONException", e.getMessage(), e);
+            Log.e(e.getLocalizedMessage(), e.getMessage(), e);
         }
 
         return contactsStringObject;
@@ -214,9 +208,6 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
-                for (int i = 0; i < cursor.getColumnNames().length; i++) {
-                    Log.v("columnnmaes", cursor.getColumnNames()[i].toString());
-                }
 
                 String contactName = cursor.getString(cursor.
                         getColumnIndex(CyncDBContract.ContactsEntry.COLUMN_NAME));
