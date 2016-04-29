@@ -25,7 +25,6 @@
         android:id="@+id/detail_item_contact_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
         android:layout_gravity="center_horizontal"
         android:fontFamily="sans-serif-condensed"
         android:textAppearance="?android:textAppearanceLarge"
@@ -35,7 +34,6 @@
         android:id="@+id/detail_item_contact_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
         android:layout_gravity="center_horizontal"
         android:fontFamily="sans-serif-condensed"
         android:textAppearance="?android:textAppearanceLarge"
@@ -47,7 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textAutoComplete"
-        android:hint="Enter Search*" />
+        android:hint="Ask Contact" />
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/lookup_button"
@@ -61,6 +59,14 @@
     <ListView
         android:id="@+id/query_list_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></ListView>
-
+        android:layout_height="match_parent"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:clickable="true"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:contextClickable="false"
+        android:drawSelectorOnTop="false"
+        android:longClickable="false"
+        android:touchscreenBlocksFocus="true"></ListView>
 </LinearLayout>
