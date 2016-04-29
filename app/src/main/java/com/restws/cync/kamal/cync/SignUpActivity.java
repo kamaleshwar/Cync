@@ -68,6 +68,7 @@ public class SignUpActivity extends AppCompatActivity implements HomeScreenActiv
                 new String[]{CyncDBContract.RegistrationEntry.COLUMN_REGISTER_STATUS},
                 null, null, null, null, null);
         Boolean signedUp = cursorLogin.moveToFirst() ? true : false;
+        cursorLogin.close();
         db.close();
         dbHelper.close();
         return signedUp;
