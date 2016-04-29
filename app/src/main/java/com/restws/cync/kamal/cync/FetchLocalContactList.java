@@ -65,7 +65,7 @@ public class FetchLocalContactList extends AsyncTask<Void, Void, Void> {
 
             client = new DefaultHttpClient();
 
-            HttpPut httpPost = new HttpPut(IP_UPDATE_URL);
+            HttpPut httpPut = new HttpPut(IP_UPDATE_URL);
             String jsonString;
             String result;
 
@@ -79,11 +79,11 @@ public class FetchLocalContactList extends AsyncTask<Void, Void, Void> {
             jsonString = jsonObject.toString();
 
             StringEntity sEntity = new StringEntity(jsonString);
-            httpPost.setEntity(sEntity);
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json");
+            httpPut.setEntity(sEntity);
+            httpPut.setHeader("Accept", "application/json");
+            httpPut.setHeader("Content-type", "application/json");
 
-            client.execute(httpPost);
+            client.execute(httpPut);
 
         } catch (JSONException | IOException e) {
             Log.e(e.getLocalizedMessage(), e.getMessage(), e);
