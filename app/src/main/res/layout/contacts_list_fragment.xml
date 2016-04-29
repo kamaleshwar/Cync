@@ -65,7 +65,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:background="@drawable/call_icon"
+            android:background="@android:drawable/ic_menu_call"
             android:fontFamily="sans-serif-condensed"
             android:textAppearance="?android:textAppearanceSmall" />
 
