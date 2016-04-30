@@ -1,18 +1,20 @@
 package com.restws.cync.kamal.cync;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,11 +48,13 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
     private static final int CONTACT_LOADER = 81000;
     private static final SQLiteQueryBuilder sRegisteredContacts = new SQLiteQueryBuilder();
     private final String BroadCastIntentId = "com.restws.cync.kamal.cync.fragmentupdater";
+    private static final String USER_DECLINE = "reject";
 
+    static boolean waitForResponse = true;
     static Context staticContext;
     static final int COL_CONTACT_NAME = 1;
     static final int COL_CONTACT_NUMBER = 2;
-
+    static Activity mActivity;
 
     static {
         sRegisteredContacts.setTables(CyncDBContract.ServerContactsEntry.TABLE_NAME + " LEFT JOIN " +
@@ -61,15 +65,12 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
 
     public LoaderManager.LoaderCallbacks<Cursor> loaderContext;
 
-    public HomeScreenActivityFragment() {
-
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         HomeScreenActivityFragment.staticContext = getContext();
+        HomeScreenActivityFragment.mActivity = getActivity();
         loaderContext = this;
         getActivity().getSupportLoaderManager().initLoader(CONTACT_LOADER, null, this);
         getActivity().registerReceiver(FragmentReceiver, new IntentFilter(BroadCastIntentId));
@@ -107,23 +108,40 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
         int columnNameIndex = contactNameCursor.getColumnIndex(CyncDBContract.ContactsEntry.COLUMN_NAME);
         String contactName = contactNameCursor.moveToFirst() ? contactNameCursor.getString(columnNameIndex) : "";
 
-        db.rawQuery("update " + CyncDBContract.ContactsEntry.TABLE_NAME + " SET " +
-                CyncDBContract.ContactsEntry.COLUMN_NUMBER + " = " + updated + " WHERE " +
-                CyncDBContract.ContactsEntry.COLUMN_NUMBER + " = " + old, null);
-
-        db.rawQuery("update " + CyncDBContract.ServerContactsEntry.TABLE_NAME + " SET " +
-                CyncDBContract.ServerContactsEntry.COLUMN_NUMBER + " = " + updated + " WHERE " +
+        Cursor serverContactUpdateCursor = db.rawQuery("delete from " + CyncDBContract.ServerContactsEntry.TABLE_NAME + " WHERE " +
                 CyncDBContract.ServerContactsEntry.COLUMN_NUMBER + " = " + old, null);
 
-        db.rawQuery("update " + CyncDBContract.CurrentContactEntry.TABLE_NAME + " SET " +
-                CyncDBContract.CurrentContactEntry.COLUMN_CURRENT_CONTACT + " = " + updated + " WHERE " +
-                CyncDBContract.CurrentContactEntry.COLUMN_CURRENT_CONTACT + " = " + old, null);
-
+        contactNameCursor.close();
+        serverContactUpdateCursor.moveToFirst();
+        serverContactUpdateCursor.close();
+        db.close();
+        dbHelper.close();
         return contactName;
     }
 
 
-    public static String searchContacts(String term) {
+    public static String trySearch(String term, boolean opnionTaken) {
+        final String searchTerm = term.split(":")[0];
+        final String contactName = term.split(":")[1];
+
+        if (!opnionTaken) {
+            mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    alertUser(searchTerm, contactName);
+                }
+            });
+        } else {
+            if (ContactSyncWebService.taken) {
+                return searchContacts(contactName, searchTerm);
+            } else {
+                return USER_DECLINE;
+            }
+        }
+        return USER_DECLINE;
+    }
+
+    public static String searchContacts(String name, String term) {
         CyncDBHelper dbHelper = new CyncDBHelper(staticContext);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         JSONArray contactsArray = new JSONArray();
@@ -151,18 +169,32 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
 
         } catch (JSONException e) {
             Log.e(e.getLocalizedMessage(), e.getMessage(), e);
+        } finally {
+            contactNameCursor.close();
+            db.close();
+            dbHelper.close();
         }
 
         return contactsStringObject;
     }
 
-
-    public interface Callback {
-        /**
-         * DetailFragmentCallback for when an item has been selected.
-         */
-        public void onItemSelected(Uri dateUri);
-
+    public static void alertUser(final String term, final String name) {
+        new AlertDialog.Builder(staticContext)
+                .setTitle("Contact lookup Request")
+                .setMessage("Allow " + name + " to search your contacts for keyword " + term + " ?")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        HomeScreenActivityFragment.waitForResponse = false;
+                        ContactSyncWebService.taken = true;
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        HomeScreenActivityFragment.waitForResponse = false;
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     @Override
@@ -222,13 +254,15 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
                 detailIntent.putExtra(contactIpKey, contactIP);
                 startActivity(detailIntent);
                 mPosition = position;
+                cursor.close();
             }
         });
-
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
+
+        cur.close();
         db.close();
         dbHelper.close();
         return rootView;
@@ -260,6 +294,4 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
         }
         super.onSaveInstanceState(outState);
     }
-
-
 }
