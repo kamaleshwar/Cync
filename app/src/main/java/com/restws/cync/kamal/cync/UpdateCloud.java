@@ -23,7 +23,7 @@ public class UpdateCloud extends AsyncTask<Object, Void, Boolean> {
     private final String newNumKey = "new_phone";
     private final String cloudEndpoint = "MyContacts";
 
-            UpdateCloud(String old, String updated){
+    UpdateCloud(String old, String updated) {
         this.old = old;
         this.updated = updated;
     }
@@ -35,7 +35,7 @@ public class UpdateCloud extends AsyncTask<Object, Void, Boolean> {
         return true;
     }
 
-    public void updateCloud(){
+    public void updateCloud() {
         String signUp = SignUpActivity.BASEURL + cloudEndpoint;
         HttpClient client = new DefaultHttpClient();
 
