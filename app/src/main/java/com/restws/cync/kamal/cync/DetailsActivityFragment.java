@@ -37,11 +37,13 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     static ListView mQueryListView;
     static LoaderManager dummyActivity;
 
+    private static String USER_DECLINE = "reject";
     private static final String SELECTED_KEY = "selected_position";
     private int mPosition = ListView.INVALID_POSITION;
     private static final int CONTACT_QUERY_LOADER = 81001;
     public static LoaderManager.LoaderCallbacks<List<String>> loaderContext;
     public static boolean userDenied = false;
+
 
     public DetailsActivityFragment() {
     }
@@ -71,7 +73,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
 
     public static void showQueryOutput(String resultString) {
 
-        if (resultString.equals(userDenied)) {
+        if (resultString.equals(USER_DECLINE)) {
             queryList.clear();
             userDenied = true;
             populateListView();
@@ -195,6 +197,5 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
             mData.clear();
         }
     }
-
 }
 
