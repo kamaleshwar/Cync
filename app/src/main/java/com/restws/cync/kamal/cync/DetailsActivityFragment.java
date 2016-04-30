@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,6 +41,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     private int mPosition = ListView.INVALID_POSITION;
     private static final int CONTACT_QUERY_LOADER = 81001;
     public static LoaderManager.LoaderCallbacks<List<String>> loaderContext;
+    public static boolean userDenied = false;
 
     public DetailsActivityFragment() {
     }
@@ -52,7 +54,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
         dummyActivity = getActivity().getSupportLoaderManager();
         queryList = new ArrayList<>();
         arrayAdapter = new QueryContactAdapter(mContext, R.layout.query_list_view_elem_details, new ArrayList());
-
+        userDenied = false;
     }
 
 
@@ -68,6 +70,14 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     }
 
     public static void showQueryOutput(String resultString) {
+
+        if (resultString.equals(userDenied)) {
+            queryList.clear();
+            userDenied = true;
+            populateListView();
+            return;
+        }
+
         try {
             JSONArray contactsArray = new JSONArray(resultString);
             queryList = new ArrayList<>();
@@ -100,7 +110,12 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
         if (mPosition != ListView.INVALID_POSITION) {
             mQueryListView.smoothScrollToPosition(mPosition);
         }
-        arrayAdapter.addAll(data);
+        if (data.isEmpty() && userDenied) {
+            Toast.makeText(getActivity(), "User Denied", Toast.LENGTH_SHORT).show();
+        } else {
+
+            arrayAdapter.addAll(data);
+        }
     }
 
     @Override
@@ -174,8 +189,12 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
 
             return convertView;
         }
-    }
 
+        @Override
+        public void clear() {
+            mData.clear();
+        }
+    }
 
 }
 
