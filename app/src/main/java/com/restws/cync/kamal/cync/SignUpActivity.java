@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Patterns;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +33,8 @@ import butterknife.OnClick;
 
 public class SignUpActivity extends AppCompatActivity implements HomeScreenActivityFragment.Callback {
 
+    @Bind(R.id.area_code_input)
+    TextView mAreaCode;
     @Bind(R.id.mobile_number_input)
     TextView mPhoneNumber;
     @Bind(R.id.password_input)
@@ -77,14 +80,19 @@ public class SignUpActivity extends AppCompatActivity implements HomeScreenActiv
     @OnClick(R.id.signup_button)
     public void signUp() {
         String email = mEmail.getText().toString();
-        String number = mPhoneNumber.getText().toString();
+        String areaCode = mAreaCode.getText().toString();
+        String number = areaCode + mPhoneNumber.getText().toString();
         String password = mPassword.getText().toString();
         String confirmedPassword = mConfirmPassword.getText().toString();
         String firstName = mFirstName.getText().toString();
         String lastName = mLastName.getText().toString();
         String localIp = getLocalIp();
 
-        if (password.equals(confirmedPassword)) {
+        if (!password.equals(confirmedPassword)) {
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Invalid Email address", Toast.LENGTH_SHORT).show();
+        } else {
             LoginChainActivities task = new LoginChainActivities(getApplicationContext());
             task.execute(new String[]{firstName, lastName, email, password, number, localIp});
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -92,8 +100,7 @@ public class SignUpActivity extends AppCompatActivity implements HomeScreenActiv
             editor.putString("m_number", number);
             editor.apply();
             startActivity(new Intent(this, HomeScreenActivity.class));
-        } else {
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+
         }
     }
 
