@@ -15,6 +15,7 @@ public class DetailsActivity extends AppCompatActivity {
     @Bind(R.id.lookup_button)
     Button mLookUpButton;
 
+    String mContactName;
     final String contactNameKey = "contactName_Key";
     final String contactNumberKey = "contactNumber_Key";
     final String contactIpKey = "ContactIP_Key";
@@ -35,6 +36,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         String contactName = extras.getString(contactNameKey);
+        mContactName = contactName;
         String contactNumber = extras.getString(contactNumberKey);
         contactIP = extras.getString(contactIpKey);
 
@@ -51,13 +53,13 @@ public class DetailsActivity extends AppCompatActivity {
     @OnClick(R.id.lookup_button)
     public void lookUp() {
         String searchTerm = mSearchTerm.getText().toString();
-        getSearchTerm(searchTerm, contactIP);
+        getSearchTerm(mContactName, searchTerm, contactIP);
         mSearchTerm.setText("");
     }
 
-    public void getSearchTerm(String term, String endpoint) {
+    public void getSearchTerm(String contactName, String term, String endpoint) {
         ContactLookUpBackgroundTask syncInBackground =
-                new ContactLookUpBackgroundTask(getBaseContext(), term, endpoint);
+                new ContactLookUpBackgroundTask(getBaseContext(), contactName, term, endpoint);
         syncInBackground.execute();
 
     }
