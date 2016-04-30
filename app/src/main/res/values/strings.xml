@@ -63,4 +63,15 @@
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_blank">BlankActivity</string>
     <string name="title_activity_details">Contact Details</string>
+    <string name="signup_and_proceed">Signup and Proceed</string>
+    <string name="last_name">Last Name*</string>
+    <string name="first_name">First Name*</string>
+    <string name="confirm_password">Confirm Password*</string>
+    <string name="password">Password*</string>
+    <string name="mobile_number">Mobile Number*</string>
+    <string name="email">Email*</string>
+    <string name="area_code">Area Code*</string>
+    <string name="text_font_style">sans-serif-condensed</string>
+    <string name="lookup">Lookup</string>
+    <string name="ask_contact">Ask Contact</string>
 </resources>
