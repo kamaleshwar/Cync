@@ -2,7 +2,6 @@ package com.restws.cync.kamal.cync;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
@@ -61,6 +60,7 @@ public class LoginChainActivities extends AsyncTask<Object, Void, Boolean> {
 
     private void populateRegistry(String email, String status) {
         ContentValues insertValues = new ContentValues();
+        insertValues.put(CyncDBContract.RegistrationEntry.COLUMN_ID, 0);
         insertValues.put(CyncDBContract.RegistrationEntry.COLUMN_EMAIL, email);
         insertValues.put(CyncDBContract.RegistrationEntry.COLUMN_REGISTER_STATUS, status);
         CyncDBHelper dbHelper = new CyncDBHelper(context);
@@ -72,19 +72,11 @@ public class LoginChainActivities extends AsyncTask<Object, Void, Boolean> {
 
     private void insertCurrentContact(String number) {
         ContentValues insertValues = new ContentValues();
+        insertValues.put(CyncDBContract.CurrentContactEntry.COLUMN_ID, 0);
         insertValues.put(CyncDBContract.CurrentContactEntry.COLUMN_CURRENT_CONTACT, number);
         CyncDBHelper dbHelper = new CyncDBHelper(context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         dbHelper.onInsert(db, CyncDBContract.CurrentContactEntry.TABLE_NAME, insertValues);
-
-        Cursor cus = dbHelper.getReadableDatabase().query(CyncDBContract.CurrentContactEntry.TABLE_NAME,
-                new String[]{CyncDBContract.CurrentContactEntry.COLUMN_CURRENT_CONTACT},
-                null,
-                null,
-                null,
-                null,
-                null);
-
         db.close();
         dbHelper.close();
     }
