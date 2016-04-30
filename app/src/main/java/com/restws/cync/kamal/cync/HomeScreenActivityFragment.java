@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
@@ -117,6 +118,15 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
         db.close();
         dbHelper.close();
         return contactName;
+    }
+
+
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(Uri dateUri);
+
     }
 
 
@@ -254,14 +264,12 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
                 detailIntent.putExtra(contactIpKey, contactIP);
                 startActivity(detailIntent);
                 mPosition = position;
-                cursor.close();
             }
         });
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
-
         cur.close();
         db.close();
         dbHelper.close();
