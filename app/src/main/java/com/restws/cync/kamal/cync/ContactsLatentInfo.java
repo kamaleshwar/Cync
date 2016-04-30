@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.restws.cync.kamal.cync.data.CyncDBContract;
 import com.restws.cync.kamal.cync.data.CyncDBHelper;
@@ -125,7 +126,7 @@ public class ContactsLatentInfo {
             Iterator localIterator = paramList.iterator();
             while (localIterator.hasNext()) {
                 insertResult = localSQLiteDatabase.insertWithOnConflict(CyncDBContract.ServerContactsEntry.TABLE_NAME,
-                        null, (ContentValues)localIterator.next(), SQLiteDatabase.CONFLICT_IGNORE);
+                        null, (ContentValues) localIterator.next(), SQLiteDatabase.CONFLICT_REPLACE);
             }
             localSQLiteDatabase.setTransactionSuccessful();
         }
@@ -153,14 +154,16 @@ public class ContactsLatentInfo {
                     ContentValues localContentValues = new ContentValues();
                     String contactNumber = (String)localIterator.next();
                     String contactIp = localJSONObject.getString(contactNumber);
-                    localContentValues.put("contact_number", contactNumber);
-                    localContentValues.put("IP", contactIp);
+                    int dummyId = 0;
+                    localContentValues.put(CyncDBContract.ServerContactsEntry.COLUMN_ID, dummyId);
+                    localContentValues.put(CyncDBContract.ServerContactsEntry.COLUMN_NUMBER, contactNumber);
+                    localContentValues.put(CyncDBContract.ServerContactsEntry.COLUMN_IP, contactIp);
                     localArrayList.add(localContentValues);
                 }
             }
             catch (JSONException e)
             {
-                e.printStackTrace();
+                Log.v(e.getLocalizedMessage(), e.getMessage(), e);
             }
         return localArrayList;
     }
