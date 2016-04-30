@@ -16,12 +16,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="16dp"
+            android:paddingRight="16dp"
             android:paddingTop="5dp"
             android:layout_gravity="center_vertical"
             android:paddingBottom="2dp"
             android:textColor="#FFFFFF"
-            android:textSize="20sp" />
-
+            android:textSize="@dimen/query_text_size" />
 
         <TextView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/q_contact_number_text_view"
@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:background="@android:drawable/ic_menu_call"
-            android:fontFamily="sans-serif-condensed"
+            android:fontFamily="@string/text_font_style"
             android:textAppearance="?android:textAppearanceSmall" />
     </LinearLayout>
 
