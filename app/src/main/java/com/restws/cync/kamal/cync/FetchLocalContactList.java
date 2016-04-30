@@ -18,7 +18,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,10 +66,7 @@ public class FetchLocalContactList extends AsyncTask<Void, Void, Void> {
 
             HttpPut httpPut = new HttpPut(IP_UPDATE_URL);
             String jsonString;
-            String result;
 
-
-            JSONArray numArray = new JSONArray();
             JSONObject jsonObject = new JSONObject();
             String latestIP = getLocalIp();
             jsonObject.put("phone", updatedNumber);
@@ -92,7 +88,7 @@ public class FetchLocalContactList extends AsyncTask<Void, Void, Void> {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(e.getLocalizedMessage(), e.getMessage(), e);
                 }
             }
         }
@@ -116,6 +112,7 @@ public class FetchLocalContactList extends AsyncTask<Void, Void, Void> {
                 }
             }
         } catch (Exception ex) {
+            Log.e(ex.getLocalizedMessage(), ex.getMessage(), ex);
         }
         return "";
     }
@@ -140,9 +137,11 @@ public class FetchLocalContactList extends AsyncTask<Void, Void, Void> {
             String contactNumber = contactsCursor.getString(contactsCursor.getColumnIndex(contactNumberCol));
             String contactName = contactsCursor.getString(contactsCursor.getColumnIndex(contactNameCol));
             String contactID = contactsCursor.getString(contactsCursor.getColumnIndex(contactIdCol));
-            if (!duplicateCheck.contains(contactID)) {
-                duplicateCheck.add(contactID);
+            int dummyId = 0;
+            if (!duplicateCheck.contains(contactNumber)) {
+                duplicateCheck.add(contactNumber);
                 ContentValues value = new ContentValues();
+                value.put(ContactsEntry.COLUMN_ID, dummyId);
                 value.put(ContactsEntry.COLUMN_NAME, contactName);
                 value.put(ContactsEntry.COLUMN_NUMBER, contactNumber.replaceAll("[+()-]", "").replace(" ", ""));
                 value.put(ContactsEntry.COLUMN_CONTACT_ID, contactID);
@@ -174,6 +173,8 @@ public class FetchLocalContactList extends AsyncTask<Void, Void, Void> {
                 mContext.sendBroadcast(intent);
             }
             db.endTransaction();
+            db.close();
+            dbHelper.close();
         }
     }
 }
