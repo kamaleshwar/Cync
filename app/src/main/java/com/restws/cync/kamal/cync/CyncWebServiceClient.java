@@ -16,19 +16,20 @@ public class CyncWebServiceClient {
     private String newContact = null;
     private String endPoint = null;
     private String oldContact = null;
-    private Context mContext;
     private String mSearchTerm;
+    private String who;
     private final String protocol = "http://";
     private final String port = "8182";
     private final String path = "/root/cync";
-    private final String errorMessage = "Cannot contact the Contact right now ";
-    private final String searchTermToken = "searchTermToken";
 
-    public CyncWebServiceClient(Context context, String searchTerm, String endPoint) {
+
+    public Context mContext;
+
+    public CyncWebServiceClient(String name, String searchTerm, String endPoint, Context context) {
         this.mSearchTerm = searchTerm;
         this.endPoint = endPoint;
         this.mContext = context;
-
+        this.who = name;
     }
 
     public CyncWebServiceClient(Context context, String oldContact, String newContact, String endPoint) {
@@ -52,10 +53,11 @@ public class CyncWebServiceClient {
     }
 
     public void searchContacts() {
-        String searchPath = path + "/" + mSearchTerm;
+        String searchPath = path + "/" + mSearchTerm + ":" + who;
         try {
-            ClientResource rService = new ClientResource(protocol + endPoint + ":" + port + searchPath);
-            String response = rService.get().getText().toString();
+            ClientResource rService;
+            rService = new ClientResource(protocol + endPoint + ":" + port + searchPath);
+            String response = rService.get().getText();
             DetailsActivityFragment.showQueryOutput(response);
         } catch (Exception e) {
             Log.e(e.getLocalizedMessage(), e.getMessage(), e);
