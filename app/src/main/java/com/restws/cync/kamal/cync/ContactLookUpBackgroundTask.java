@@ -9,14 +9,17 @@ import android.os.AsyncTask;
 public class ContactLookUpBackgroundTask
         extends AsyncTask<Void, Void, Void> {
 
+    private String mContactName;
     private String term;
     private String endpoint;
     private Context mContext;
 
-    public ContactLookUpBackgroundTask(Context paramContext, String term, String endpoint) {
+
+    public ContactLookUpBackgroundTask(Context paramContext, String name, String term, String endpoint) {
         this.mContext = paramContext;
         this.endpoint = endpoint;
         this.term = term;
+        this.mContactName = name;
     }
 
     @Override
@@ -26,7 +29,7 @@ public class ContactLookUpBackgroundTask
     }
 
     private void searchQuery() {
-        new CyncWebServiceClient(mContext, term, endpoint).searchContacts();
+        new CyncWebServiceClient(mContactName, term, endpoint, mContext).searchContacts();
     }
 
 }
