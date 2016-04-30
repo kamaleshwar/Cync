@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:fontFamily="sans-serif-condensed"
+        android:fontFamily="@string/text_font_style"
         android:textAppearance="?android:textAppearanceLarge"
         android:textSize="20sp" />
 
@@ -35,7 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:fontFamily="sans-serif-condensed"
+        android:fontFamily="@string/text_font_style"
         android:textAppearance="?android:textAppearanceLarge"
         android:textSize="20sp" />
 
@@ -45,7 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textAutoComplete"
-        android:hint="Ask Contact" />
+        android:hint="@string/ask_contact" />
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/lookup_button"
@@ -54,7 +54,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginBottom="24dp"
         android:padding="12dp"
-        android:text="Lookup" />
+        android:text="@string/lookup" />
 
     <ListView
         android:id="@+id/query_list_view"
