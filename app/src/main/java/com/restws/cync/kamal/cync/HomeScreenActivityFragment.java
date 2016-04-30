@@ -264,13 +264,13 @@ public class HomeScreenActivityFragment extends Fragment implements LoaderManage
                 detailIntent.putExtra(contactIpKey, contactIP);
                 startActivity(detailIntent);
                 mPosition = position;
+                cursor.close();
             }
         });
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
-        cur.close();
         db.close();
         dbHelper.close();
         return rootView;
