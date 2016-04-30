@@ -16,6 +16,7 @@ public class ContactSyncWebService extends ServerResource implements ContactSync
     private String oldNumber = "oldContactNumber";
     private String newNumber = "newContactNumber";
     private final String searchAttribute = "term";
+    public static boolean taken = false;
 
     @Override
     @Post
@@ -28,6 +29,7 @@ public class ContactSyncWebService extends ServerResource implements ContactSync
             HomeScreenActivityFragment.updatePhoneBook(contactName, updated);
 
         } catch (Exception e) {
+            Log.e(e.getLocalizedMessage(), e.getMessage(), e);
         }
         return "OK";
     }
@@ -36,12 +38,18 @@ public class ContactSyncWebService extends ServerResource implements ContactSync
     @Get
     public String searchContacts() {
         String response = "";
+        ContactSyncWebService.taken = false;
         try {
-
             String searchTerm = getAttribute(searchAttribute);
-            response = HomeScreenActivityFragment.searchContacts(searchTerm);
+            response = HomeScreenActivityFragment.trySearch(searchTerm, false);
+            while (HomeScreenActivityFragment.waitForResponse) {
+                //dummy loop to wait for the user response.
+                // I know this is bad...
+            }
+            response = HomeScreenActivityFragment.trySearch(searchTerm, true);
+            HomeScreenActivityFragment.waitForResponse = true;
         } catch (Exception e) {
-            Log.e("errorhere", e.getMessage(), e);
+            Log.e(e.getLocalizedMessage(), e.getMessage(), e);
         }
         return response;
     }
