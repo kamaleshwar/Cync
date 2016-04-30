@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -20,8 +21,11 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import com.restws.cync.kamal.cync.data.CyncDBContract;
 import com.restws.cync.kamal.cync.data.CyncDBHelper;
@@ -95,10 +99,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
     };
 
-    public static void setContext(Context context){
-        ctx = context;
-    }
-
     /**
      * Helper method to determine if the device has an extra-large screen. For
      * example, 10" tablets are extra-large.
@@ -132,7 +132,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.ctx = getApplicationContext();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.settings_toolbar);
+        setSupportActionBar(toolbar);
         setupActionBar();
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        this.setTitle(R.string.title_activity_settings);
+        LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
+        Toolbar bar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
+        root.addView(bar, 0);
+
     }
 
     /**
@@ -205,10 +218,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     if(key.equals(number_Key)) {
                         String updatedNumber = prefs.getString(number_Key, "xxx");
                         oldNumber = getOldNumber();
+                        updateCurrentNumber(oldNumber, updatedNumber);
                         UpdateCloud task = new UpdateCloud(oldNumber, updatedNumber);
                         task.execute();
                         BackgroundWebServerRequest syncInBackground =
-                                new BackgroundWebServerRequest(oldNumber, updatedNumber, getActivity());
+                                new BackgroundWebServerRequest(oldNumber, updatedNumber, ctx);
                         syncInBackground.execute();
                     }
                 }
@@ -224,7 +238,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
 
         public String getOldNumber(){
-            CyncDBHelper dbHelper = new CyncDBHelper(getActivity());
+            CyncDBHelper dbHelper = new CyncDBHelper(ctx);
             Cursor cus = dbHelper.getReadableDatabase().query(CyncDBContract.CurrentContactEntry.TABLE_NAME,
                     new String[]{CyncDBContract.CurrentContactEntry.COLUMN_CURRENT_CONTACT},
                     null,
@@ -233,12 +247,26 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     null,
                     null);
 
-            String oldContact = cus.moveToFirst()?cus.getString(cus.getColumnIndex(CyncDBContract.CurrentContactEntry.COLUMN_CURRENT_CONTACT))
-                    :"";
+            String oldContact = cus.moveToFirst() ? cus.getString(cus.getColumnIndex(
+                    CyncDBContract.CurrentContactEntry.COLUMN_CURRENT_CONTACT)) : "";
+            cus.close();
             dbHelper.close();
             return oldContact;
         }
 
+        public void updateCurrentNumber(String old, String updated) {
+            CyncDBHelper dbHelper = new CyncDBHelper(ctx);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            Cursor currentContactUpdate = db.rawQuery("update " + CyncDBContract.CurrentContactEntry.TABLE_NAME + " SET " +
+                    CyncDBContract.CurrentContactEntry.COLUMN_CURRENT_CONTACT + " = " + updated + " WHERE " +
+                    CyncDBContract.CurrentContactEntry.COLUMN_CURRENT_CONTACT + " = " + old, null);
+
+            currentContactUpdate.moveToFirst();
+            currentContactUpdate.close();
+            db.close();
+            dbHelper.close();
+
+        }
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
@@ -260,8 +288,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_notification);
-            setHasOptionsMenu(true);
+
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
