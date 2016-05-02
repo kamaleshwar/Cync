@@ -34,7 +34,7 @@ Cync also enable a user to lookup the contact's contacts on approval by the cont
 
 ## Note
 
-The works only for the devices on the same network now as there are no static endpoints for the local services. Any ideas are welcome to fix the issue.
+This application works only for the devices on the same network now as there are no static endpoints for the local services. Any ideas are welcome to fix the issue.
 
 ## License
 
