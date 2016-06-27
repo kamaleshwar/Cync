@@ -38,7 +38,7 @@ This application works only for the devices on the same network now as there are
 
 ## License
 
-Copyright: Kamaleshwar Panapakam 
+Copyright: Kamaleshwar Panapakam </br>
 panapakam.kamaleshwar@gmail.com
 
 
